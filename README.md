@@ -8,7 +8,7 @@ Tradeable Savings Accounts featuring evolving digital artwork and game-mechanism
   * must be _watered_ by depositing 20 DAI into the bank every 7 days
   * must be _fertilized_ by depositing 0.02 ETH into the bank every 30 days
   * can _wither_ if watering is more than 7 days late and 5% of the deposits will go to the botonist
-  * can _grow_ if taken care of correctly for 90 days and the botonist will make enhance the bonsai art
+  * can _grow_ if taken care of correctly for 90 days the botonist will make an enhancement to the bonsai art
   * must be _destroyed_ to recover the deposits plus an interest earned
 
 ## Protocol Specification
