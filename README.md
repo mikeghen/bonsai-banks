@@ -2,7 +2,7 @@
 Tradeable Savings Accounts featuring evolving digital artwork and game-mechanisms to incentivize saving.
 
 ## Overview
-* Bonsai Banks are bonsai NFT artworks that need tended to using on-chain transactions
+* Bonsai Banks are bonsai NFT artworks that must be tended to using on-chain transactions
 * Each Bonsai Bank...
   * is minted by the _botonist_ or contract owner
   * must be _watered_ by depositing 20 DAI into the bank every 7 days
