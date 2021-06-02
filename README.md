@@ -39,6 +39,15 @@ Tradeable Savings Accounts featuring evolving digital artwork and game-mechanism
 * `onlyBotonist` - modifies methods so they can only be called by `botonist`
 
 ### Methods
+#### mint(address caretaker, string bonsaiURI)
+* Parameters
+  * `caretaker` - The address this bonsai is minted to
+  * `bonsaiURI` - the URI associated with the minted bonsai
+* Pre-conditions
+  * None
+* Post-conditions
+  * 1 BNZI is transferred to `caretaker`
+
 #### water(uint256 bonsaiId)
 * Parameters
   * `bonsaiId` - The id of the bonsai to water
@@ -80,6 +89,7 @@ Tradeable Savings Accounts featuring evolving digital artwork and game-mechanism
   * It has been `waterRate * 2` seconds since the last watering
 * Post-conditions
   * 5% of all `balances` for this bonsai are slashed and set to the botonist
+  * `consecutiveWaterings` and `consecutiveFertilizings` are reset
 
 
 #### destroy(uint256 bonsaiId)
