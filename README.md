@@ -16,6 +16,7 @@ Tradeable Savings Accounts featuring evolving digital artwork and game-mechanism
 
 ### Parameters
 * `address botonist` - The owner of the contract and the producer of the artworks
+* `BonsaiBank[] bonsaiBanks` - A list of all the bonsai banks indexable using `bonsaiId`s
 * `address waterToken` - The token used to water the plant
 * `address fertToken` - The token used to fertilize a plant
 * `uint256 waterAmount` - The amount of `waterToken` needed to water the plant
