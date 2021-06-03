@@ -8,14 +8,43 @@ import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/utils/Counters.sol";
 
 contract BonsaiBank is ERC721URIStorage {
     using Counters for Counters.Counter;
-    Counters.Counter private _bonsaiIds;
+    Counters.Counter private bonsaiIds;
+
+    struct Bonsai {
+      uint256 lastWatered;
+      uint256 consecutiveWaterings;
+      uint256 waterBalance;
+      uint256 lastFertilized;
+      uint256 consecutiveFertilizings;
+      uint256 fertilizerBalance;
+      uint256 lifeStage;
+      uint256 bonsaiId;
+    }
+
+    Bonsai[] bonsaiBanks; // All bonsai banks, indexible by tokenId - 1
+
+    address botanist;
+    address waterToken;
+    address fertToken;
+    uint256 waterAmount;
+    uint256 fertAmount;
+    uint256 waterRate;
+    uint256 fertRate;
+
 
     constructor() ERC721("Bonsai Bank", "BNZI") {}
 
-    // Methods
-
+    // @dev Mints a new Bonsai Bank directly to the caretaker
     function mint(address caretaker, string memory bonsaiURI) external returns (uint256 bonsaiId) {
-      // ...
+
+      bonsaiIds.increment();
+      uint256 _bonsaiId = bonsaiIds.current();
+      Bonsai memory bb = Bonsai(0,0,0,0,0,0,0,_bonsaiId);
+      _mint(caretaker, _bonsaiId);
+      _setTokenURI(_bonsaiId, bonsaiURI);
+      bonsaiBanks.push(bb);
+      return _bonsaiId;
+
     }
 
     function water(uint256 bonsaiId) external {
@@ -40,32 +69,32 @@ contract BonsaiBank is ERC721URIStorage {
 
     // Getter Methods
 
-    function waterBalance(uint256 bonsaiId) external view returns (uint256){
-      // ...
-    }
-
-    function fertilizerBalance(uint256 bonsaiId) external view returns (uint256){
-      // ...
-    }
-
     function lastWatered(uint256 bonsaiId) external view returns (uint256){
-      // ...
+      return bonsaiBanks[bonsaiId-1].lastWatered;
     }
 
     function consecutiveWaterings(uint256 bonsaiId) external view returns (uint256){
-      // ...
+      return bonsaiBanks[bonsaiId-1].consecutiveWaterings;
+    }
+
+    function waterBalance(uint256 bonsaiId) external view returns (uint256){
+      return bonsaiBanks[bonsaiId-1].waterBalance;
     }
 
     function lastFertilized(uint256 bonsaiId) external view returns (uint256){
-      // ...
+      return bonsaiBanks[bonsaiId-1].lastFertilized;
     }
 
     function consecutiveFertilizings(uint256 bonsaiId) external view returns (uint256){
-      // ...
+      return bonsaiBanks[bonsaiId-1].consecutiveFertilizings;
+    }
+
+    function fertilizerBalance(uint256 bonsaiId) external view returns (uint256){
+      return bonsaiBanks[bonsaiId-1].fertilizerBalance;
     }
 
     function lifeStage(uint256 bonsaiId) external view returns (uint256){
-      // ...
+      return bonsaiBanks[bonsaiId-1].lifeStage;
     }
 
 

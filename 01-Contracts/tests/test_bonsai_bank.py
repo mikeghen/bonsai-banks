@@ -28,8 +28,8 @@ def dai(Contract):
 
 
 @pytest.fixture
-def bbank(BonsaiBank, dai, weth, accounts):
-    return BonsaiBank.deploy(dai, weth, {"from": accounts[0]})
+def bbank(BonsaiBank, accounts):
+    return accounts[0].deploy(BonsaiBank)
 
 
 @pytest.fixture
@@ -94,20 +94,21 @@ Test Suite Outline
 """
 
 # bonsai can be minted
-def test_mint_bonsai():
+def test_mint_bonsai(bbank, caretaker, botanist):
     # Check that a new minted bonsai is created with all the right properties
     bonsai_uri = "ipfs://aaaa"
     # Mint a new token to the caretaker directly
-    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist})
+    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist}).return_value
     # Check properties were done correctly
-    assert 0 == bbank.lastWatered(bonsai_id)
-    assert 0 == bbank.consecutiveWaterings(bonsai_id)
-    assert 0 == bbank.lastFertilized(bonsai_id)
-    assert 0 == bbank.consecutiveFertilizings(bonsai_id)
-    assert bonsai_id == bbank.bonsaiId(caretaker)
-    assert 0 == bbank.waterBalance(bonsai_id)
-    assert 0 == bbank.fertilizerBalance(bonsai_id)
-    assert 0 == bbank.lifeStage(bonsai_id)
+    assert bonsai_id == 1
+    assert bbank.lastWatered(bonsai_id) == 0
+    assert bbank.consecutiveWaterings(bonsai_id) == 0
+    assert bbank.waterBalance(bonsai_id) == 0
+    assert bbank.lastFertilized(bonsai_id) == 0
+    assert bbank.consecutiveFertilizings(bonsai_id) == 0
+    assert bbank.fertilizerBalance(bonsai_id) == 0
+    assert bbank.lifeStage(bonsai_id) == 0
+    assert "ipfs://aaaa" == bbank.tokenURI(bonsai_id)
 
 # bonsai can only be minted by the botanist
 def test_mint_not_botanist(bbank, dai, weth, caretaker, botanist):
