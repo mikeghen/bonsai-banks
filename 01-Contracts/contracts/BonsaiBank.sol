@@ -32,10 +32,17 @@ contract BonsaiBank is ERC721URIStorage {
     uint256 fertRate;
 
 
-    constructor() ERC721("Bonsai Bank", "BNZI") {}
+    constructor(address _botanist) ERC721("Bonsai Bank", "BNZI") {
+        botanist = _botanist;
+    }
+
+    modifier onlyBotanist {
+      require(msg.sender == botanist);
+      _;
+    }
 
     // @dev Mints a new Bonsai Bank directly to the caretaker
-    function mint(address caretaker, string memory bonsaiURI) external returns (uint256 bonsaiId) {
+    function mint(address caretaker, string memory bonsaiURI) external onlyBotanist returns (uint256 bonsaiId)  {
 
       bonsaiIds.increment();
       uint256 _bonsaiId = bonsaiIds.current();
@@ -55,11 +62,11 @@ contract BonsaiBank is ERC721URIStorage {
       // ...
     }
 
-    function grow(uint256 bonsaiId, string memory bonsaiURI) external {
+    function grow(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {
       // ...
     }
 
-    function wither(uint256 bonsaiId, string memory bonsaiURI) external {
+    function wither(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {
       // ...
     }
 
@@ -68,7 +75,7 @@ contract BonsaiBank is ERC721URIStorage {
     }
 
     // Getter Methods
-
+    // TODO: Add `get` prefix
     function lastWatered(uint256 bonsaiId) external view returns (uint256){
       return bonsaiBanks[bonsaiId-1].lastWatered;
     }
@@ -95,6 +102,35 @@ contract BonsaiBank is ERC721URIStorage {
 
     function lifeStage(uint256 bonsaiId) external view returns (uint256){
       return bonsaiBanks[bonsaiId-1].lifeStage;
+    }
+
+    // Setter Methods
+    function setLastWatered(uint256 bonsaiId, uint256 _lastWatered) external onlyBotanist {
+      bonsaiBanks[bonsaiId-1].lastWatered = _lastWatered;
+    }
+
+    function setConsecutiveWaterings(uint256 bonsaiId, uint256 _consecutiveWaterings) external onlyBotanist {
+      bonsaiBanks[bonsaiId-1].consecutiveWaterings = _consecutiveWaterings;
+    }
+
+    function setWaterBalance(uint256 bonsaiId, uint256 _waterBalance) external onlyBotanist {
+      bonsaiBanks[bonsaiId-1].waterBalance = _waterBalance;
+    }
+
+    function setLastFertilized(uint256 bonsaiId, uint256 _lastFertilized) external onlyBotanist {
+      bonsaiBanks[bonsaiId-1].lastFertilized = _lastFertilized;
+    }
+
+    function setConsecutiveFertilizings(uint256 bonsaiId, uint256 _consecutiveFertilizings) external onlyBotanist {
+      bonsaiBanks[bonsaiId-1].consecutiveFertilizings = _consecutiveFertilizings;
+    }
+
+    function setFertilizerBalance(uint256 bonsaiId, uint256 _fertilizerBalance) external onlyBotanist {
+      bonsaiBanks[bonsaiId-1].fertilizerBalance = _fertilizerBalance;
+    }
+
+    function setLifeStage(uint256 bonsaiId, uint256 _lifeStage) external onlyBotanist {
+      bonsaiBanks[bonsaiId-1].lifeStage = _lifeStage;
     }
 
 

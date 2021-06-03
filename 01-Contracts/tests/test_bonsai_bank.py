@@ -1,4 +1,4 @@
-from brownie import accounts
+from brownie import accounts, reverts
 from brownie.network.state import Chain
 import pytest
 
@@ -26,12 +26,6 @@ def weth(Contract):
 def dai(Contract):
     yield Contract.from_explorer(WETH_ADDRESS)
 
-
-@pytest.fixture
-def bbank(BonsaiBank, accounts):
-    return accounts[0].deploy(BonsaiBank)
-
-
 @pytest.fixture
 def botanist(accounts):
     return accounts[0]
@@ -41,6 +35,9 @@ def botanist(accounts):
 def caretaker(accounts):
     return accounts[1]
 
+@pytest.fixture
+def bbank(BonsaiBank, botanist):
+    return botanist.deploy(BonsaiBank, botanist)
 
 @pytest.fixture
 def bonsai_wither(bbank, caretaker, botanist, chain):
@@ -111,11 +108,11 @@ def test_mint_bonsai(bbank, caretaker, botanist):
     assert "ipfs://aaaa" == bbank.tokenURI(bonsai_id)
 
 # bonsai can only be minted by the botanist
-def test_mint_not_botanist(bbank, dai, weth, caretaker, botanist):
+def test_mint_not_botanist(bbank, caretaker, botanist):
     # Check that a new minted bonsai is created with all the right properties
     bonsai_uri = "ipfs://aaaa"
     # Mint a new token as the caretaker and revert
-    with brownie.reverts():
+    with reverts():
         bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": caretaker})
 
 # bonsai can be watered
@@ -141,7 +138,7 @@ def test_watering_early(bbank, dai, weth, caretaker, botanist):
     dai.approve(bbank.address, water_rate)
     bbank.water(bonsai_id, {"from": caretaker})
     # Second watering will revert bc it hasn't been 7 days
-    with brownie.reverts():
+    with reverts():
         bbank.water(bonsai_id, {"from": caretaker})
 
 # bonsai can be fertilized
@@ -167,7 +164,7 @@ def test_fertilizing_early(bbank, dai, weth, caretaker, botanist):
     dai.approve(bbank.address, water_rate)
     bbank.fertilize(bonsai, {"from": caretaker})
     # Second fertilizing will revert bc. it hasn't been 30 days
-    with brownie.reverts():
+    with reverts():
         bbank.fertilize(bonsai, {"from": caretaker})
 
 # bondai can grow
@@ -186,7 +183,7 @@ def test_grow_early(bbank, dai, weth, caretaker, botanist, bonsai_grow):
     new_bonsai_uri = "ipfs://nnnn"
     bbank.grow(bonsai_grow, new_bonsai_uri, {"from": botanist})
     # Second fertilizing will revert bc. it hasn't been 30 days
-    with brownie.reverts():
+    with reverts():
         bbank.grow(bonsai_grow, new_bonsai_uri, {"from": botanist})
 
 
@@ -210,7 +207,7 @@ def test_wither(bbank, dai, weth, caretaker, botanist, bonsai_wither):
 def test_wither_early(bbank, dai, weth, caretaker, botanist, bonsai_wither):
     bbank.wither(bonsai_wither, {"from": botanist})
     # Second fertilizing will revert bc. it hasn't been 30 days
-    with brownie.reverts():
+    with reverts():
         bbank.wither(bonsai_wither, {"from": botanist})
 
 # bonsai can be destroyed to recover the funds
