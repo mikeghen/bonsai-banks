@@ -31,6 +31,7 @@ contract BonsaiBank is ERC721URIStorage {
     uint256 fertAmount;
     uint256 waterRate;
     uint256 fertRate;
+    uint256 wateringsToGrow = 15; // ~3 months
 
 
     constructor(address _botanist) ERC721("Bonsai Bank", "BNZI") {
@@ -191,8 +192,11 @@ contract BonsaiBank is ERC721URIStorage {
       bonsaiBanks[_bonsaiId - 1].fertilizerBalance += getFertAmount();
     }
 
-    function grow(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {
-      // ...
+    function grow(uint256 _bonsaiId, string memory _bonsaiURI) external onlyBotanist {
+      require(bonsaiBanks[_bonsaiId - 1].consecutiveWaterings >= wateringsToGrow, "!growable");
+      _setTokenURI(_bonsaiId, _bonsaiURI);
+      bonsaiBanks[_bonsaiId - 1].lifeStage += 1;
+      bonsaiBanks[_bonsaiId - 1].consecutiveWaterings = 0;
     }
 
     function wither(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {

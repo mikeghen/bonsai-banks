@@ -12,10 +12,7 @@ DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F"
 WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 SEVEN_DAYS = 60 * 60 * 24 * 7 + 60    # plus 1 min. on each
 THIRTY_DAYS = 60 * 60 * 24 * 30 + 60
-
-@pytest.fixture
-def chain(Chain):
-    return Chain()
+chain = Chain()
 
 @pytest.fixture
 def botanist(accounts):
@@ -60,19 +57,19 @@ def bonsai_wither(bbank, caretaker, botanist, chain):
     return bonsai_id
 
 @pytest.fixture
-def bonsai_grow(bbank, caretaker, botanist, chain):
+def bonsai_grow(bbank, caretaker, botanist, weth, dai, chain):
     # Return the tokenId of a bonsai ready to grow
     bonsai_uri = "ipfs://gggg"
-    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist})
-    fert_rate = bbank.fertRate()
-    water_rate = bbank.waterRate()
+    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist}).return_value
+    fert_amt = bbank.getFertAmount()
+    water_amt = bbank.getWaterAmount()
     # Tend to the bonsai for 3 months, 5 weeks per month
     for i in range(0, 3): # 3 months
-        weth.appove(bbank.address, fert_rate, {"from": caretaker})
-        bbank.fertilize(bonsai_id)
+        weth.approve(bbank.address, fert_amt, {"from": caretaker})
+        bbank.fertilize(bonsai_id, {"from": caretaker})
         for j in range(0,5): # 5 weeks each month
-            dai.appove(bbank.address, water_rate, {"from": caretaker})
-            bbank.water(bonsai_id)
+            dai.approve(bbank.address, water_amt, {"from": caretaker})
+            bbank.water(bonsai_id, {"from": caretaker})
             chain.sleep(SEVEN_DAYS)
 
     return bonsai_id
@@ -180,13 +177,12 @@ def test_fertilizing_early(bbank, dai, weth, caretaker, botanist):
 # bondai can grow
 def test_grow(bbank, dai, weth, caretaker, botanist, bonsai_grow):
     new_bonsai_uri = "ipfs://nnnn"
+    assert 15 == bbank.consecutiveWaterings(bonsai_grow)
     bbank.grow(bonsai_grow, new_bonsai_uri, {"from": botanist})
     ending_weth = weth.balanceOf(caretaker)
-    # Resets params
-    assert 0 == bbank.consecutiveWaterings(bonsai_id)
-    assert 0 == bbank.consecutiveFertilizings(bonsai_id)
-    assert ["ipfs://gggg", new_bonsai_uri] == bbank.bonsaiUris(bonsai_id)
-    assert 1 == bbank.lifeStage(bonsai_id)
+    assert 0 == bbank.consecutiveWaterings(bonsai_grow)
+    assert new_bonsai_uri == bbank.tokenURI(bonsai_grow)
+    assert 1 == bbank.lifeStage(bonsai_grow)
 
 # bonsai can only grow after 90 days of tending
 def test_grow_early(bbank, dai, weth, caretaker, botanist, bonsai_grow):
