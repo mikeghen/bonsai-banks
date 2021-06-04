@@ -17,7 +17,6 @@ THIRTY_DAYS = 60 * 60 * 24 * 30 + 60
 def chain(Chain):
     return Chain()
 
-
 @pytest.fixture
 def botanist(accounts):
     return accounts[0]
@@ -31,10 +30,8 @@ def weth(caretaker, Token):
     return caretaker.deploy(Token, "WETH", "WETH", 18, 1000 * 10**18)
 
 @pytest.fixture
-def dai(caretaker, botanist, Token):
-    d = botanist.deploy(Token, "DAI", "DAI", 18, 1000 * 10**18)
-    d.transfer(caretaker, 1000 * 10**18, {'from': botanist})
-    return d
+def dai(caretaker, Token):
+    return caretaker.deploy(Token, "DAI", "DAI", 18, 1000 * 10**18)
 
 @pytest.fixture
 def bbank(BonsaiBank, botanist, dai, weth):
@@ -86,10 +83,6 @@ def test_account_balance():
     balance = accounts[0].balance()
     accounts[0].transfer(accounts[1], "10 ether", gas_price=0)
     assert balance - "10 ether" == accounts[0].balance()
-
-def test_transfer(token):
-    token.transfer(accounts[1], 100, {'from': accounts[0]})
-    assert token.balanceOf(accounts[0]) == 900
 
 """
 Test Suite Outline
@@ -162,27 +155,27 @@ def test_watering_early(bbank, dai, weth, caretaker, botanist):
 def test_fertilizing(bbank, dai, weth, caretaker, botanist):
     bonsai_uri = "ipfs://aaaa"
     bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist}).return_value
-    fert_rate = bbank.fertRate()
-    weth.approve(bbank.address, fert_rate)
+    fert_amt = bbank.getFertAmount()
+    weth.approve(bbank.address, fert_amt, {"from": caretaker})
     starting_weth = weth.balanceOf(caretaker)
     bbank.fertilize(bonsai_id, {"from": caretaker})
     ending_weth = weth.balanceOf(caretaker)
-    assert starting_weth - ending_weth == fert_rate
+    assert starting_weth - ending_weth == fert_amt
     assert 0 != bbank.lastFertilized(bonsai_id)
     assert 1 == bbank.consecutiveFertilizings(bonsai_id)
     assert 0 == bbank.waterBalance(bonsai_id)
-    assert 0 == bbank.fertilizerBalance(bonsai_id)
+    assert fert_amt == bbank.fertilizerBalance(bonsai_id)
 
 # bonsai can only be fertilized every 30 days
 def test_fertilizing_early(bbank, dai, weth, caretaker, botanist):
     bonsai_uri = "ipfs://aaaa"
-    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist})
-    fert_rate = bbank.fertRate()
-    dai.approve(bbank.address, water_rate)
-    bbank.fertilize(bonsai, {"from": caretaker})
+    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist}).return_value
+    fert_amt = bbank.getFertAmount()
+    weth.approve(bbank.address, fert_amt, {"from": caretaker})
+    bbank.fertilize(bonsai_id, {"from": caretaker})
     # Second fertilizing will revert bc. it hasn't been 30 days
     with reverts():
-        bbank.fertilize(bonsai, {"from": caretaker})
+        bbank.fertilize(bonsai_id, {"from": caretaker})
 
 # bondai can grow
 def test_grow(bbank, dai, weth, caretaker, botanist, bonsai_grow):

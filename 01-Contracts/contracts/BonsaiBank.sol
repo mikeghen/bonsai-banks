@@ -45,15 +45,15 @@ contract BonsaiBank is ERC721URIStorage {
     // Getter Methods
     // TODO: Add `get` prefix
 
-    function getBotanist() external view returns(address) {
+    function getBotanist() public view returns(address) {
       return botanist;
     }
 
-    function getWaterToken() external view returns(address) {
+    function getWaterToken() public view returns(address) {
       return waterToken;
     }
 
-    function getFertToken() external view returns(address) {
+    function getFertToken() public view returns(address) {
       return fertToken;
     }
 
@@ -61,15 +61,15 @@ contract BonsaiBank is ERC721URIStorage {
       return waterAmount;
     }
 
-    function getFertAmount() external view returns(uint256) {
+    function getFertAmount() public view returns(uint256) {
       return fertAmount;
     }
 
-    function getWaterRate() external view returns(uint256) {
+    function getWaterRate() public view returns(uint256) {
       return waterRate;
     }
 
-    function getFertRate() external view returns(uint256) {
+    function getFertRate() public view returns(uint256) {
       return fertRate;
     }
 
@@ -176,15 +176,19 @@ contract BonsaiBank is ERC721URIStorage {
     }
 
     function water(uint256 _bonsaiId) external {
-      require(bonsaiBanks[_bonsaiId - 1].lastWatered < block.timestamp - 7 days, "!waterable");
+      require(bonsaiBanks[_bonsaiId - 1].lastWatered < block.timestamp - waterRate, "!waterable");
       require(IERC20(waterToken).transferFrom(msg.sender, address(this), getWaterAmount()), "!watered");
       bonsaiBanks[_bonsaiId - 1].lastWatered = block.timestamp;
       bonsaiBanks[_bonsaiId - 1].consecutiveWaterings += 1;
       bonsaiBanks[_bonsaiId - 1].waterBalance += getWaterAmount();
     }
 
-    function fertilize(uint256 bonsaiId) external {
-      // ...
+    function fertilize(uint256 _bonsaiId) external {
+      require(bonsaiBanks[_bonsaiId - 1].lastFertilized < block.timestamp - fertRate, "!fertalizable");
+      require(IERC20(fertToken).transferFrom(msg.sender, address(this), getFertAmount()), "!fertilized");
+      bonsaiBanks[_bonsaiId - 1].lastFertilized = block.timestamp;
+      bonsaiBanks[_bonsaiId - 1].consecutiveFertilizings += 1;
+      bonsaiBanks[_bonsaiId - 1].fertilizerBalance += getFertAmount();
     }
 
     function grow(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {
