@@ -6,8 +6,10 @@ import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/token/ERC721/ERC721.
 import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/token/ERC20/IERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/utils/Counters.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/utils/math/SafeMath.sol";
 
 contract BonsaiBank is ERC721URIStorage {
+    using SafeMath for uint256;
     using Counters for Counters.Counter;
     Counters.Counter private bonsaiIds;
 
@@ -44,7 +46,6 @@ contract BonsaiBank is ERC721URIStorage {
     }
 
     // Getter Methods
-    // TODO: Add `get` prefix
 
     function getBotanist() public view returns(address) {
       return botanist;
@@ -200,9 +201,9 @@ contract BonsaiBank is ERC721URIStorage {
     }
 
     function wilt(uint256 _bonsaiId, string memory _bonsaiURI) external onlyBotanist {
-      require(bonsaiBanks[_bonsaiId - 1].lastWatered <= block.timestamp - waterRate * 2, "!wiltable");
-      uint256 waterSlashAmount = bonsaiBanks[_bonsaiId - 1].waterBalance * 95 / 100;     // TODO: Safe Math
-      uint256 fertSlashAmount = bonsaiBanks[_bonsaiId - 1].fertilizerBalance * 95 / 100; // TODO: Safe Math
+      require(bonsaiBanks[_bonsaiId - 1].lastWatered <= block.timestamp - waterRate.mul(2), "!wiltable");
+      uint256 waterSlashAmount = bonsaiBanks[_bonsaiId - 1].waterBalance.mul(95).div(100);     // TODO: Safe Math
+      uint256 fertSlashAmount = bonsaiBanks[_bonsaiId - 1].fertilizerBalance.mul(95).div(100); // TODO: Safe Math
       require(IERC20(waterToken).transfer(botanist,  waterSlashAmount), "!slashedWater");
       require(IERC20(fertToken).transfer(botanist, fertSlashAmount), "!slashedFert");
       _setTokenURI(_bonsaiId, _bonsaiURI);
