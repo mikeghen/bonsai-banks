@@ -19,25 +19,37 @@ def chain(Chain):
 
 
 @pytest.fixture
-def weth(Contract):
-    yield Contract.from_explorer(DAI_ADDRESS)
-
-@pytest.fixture
-def dai(Contract):
-    yield Contract.from_explorer(WETH_ADDRESS)
-
-@pytest.fixture
 def botanist(accounts):
     return accounts[0]
-
 
 @pytest.fixture
 def caretaker(accounts):
     return accounts[1]
 
 @pytest.fixture
-def bbank(BonsaiBank, botanist):
-    return botanist.deploy(BonsaiBank, botanist)
+def weth(caretaker, Token):
+    return caretaker.deploy(Token, "WETH", "WETH", 18, 1000 * 10**18)
+
+@pytest.fixture
+def dai(caretaker, botanist, Token):
+    d = botanist.deploy(Token, "DAI", "DAI", 18, 1000 * 10**18)
+    d.transfer(caretaker, 1000 * 10**18, {'from': botanist})
+    return d
+
+@pytest.fixture
+def bbank(BonsaiBank, botanist, dai, weth):
+    bb = botanist.deploy(BonsaiBank, botanist)
+    bb.setWaterToken(dai)
+    bb.setFertToken(weth)
+    assert bb.getWaterToken() == dai
+    # 20 DAI per week
+    bb.setWaterAmount(20 * 10**18)
+    bb.setWaterRate(60 * 60 * 24 * 7)
+    # 0.02 WETH per month
+    bb.setFertAmount(0.02 * 10**18)
+    bb.setFertRate(60 * 60 * 24 * 30)
+    return bb
+
 
 @pytest.fixture
 def bonsai_wither(bbank, caretaker, botanist, chain):
@@ -49,7 +61,6 @@ def bonsai_wither(bbank, caretaker, botanist, chain):
     bbank.water(bonsai_id)
     chain.sleep(THIRTY_DAYS)
     return bonsai_id
-
 
 @pytest.fixture
 def bonsai_grow(bbank, caretaker, botanist, chain):
@@ -69,11 +80,16 @@ def bonsai_grow(bbank, caretaker, botanist, chain):
 
     return bonsai_id
 
+
 # Canary Test
 def test_account_balance():
     balance = accounts[0].balance()
     accounts[0].transfer(accounts[1], "10 ether", gas_price=0)
     assert balance - "10 ether" == accounts[0].balance()
+
+def test_transfer(token):
+    token.transfer(accounts[1], 100, {'from': accounts[0]})
+    assert token.balanceOf(accounts[0]) == 900
 
 """
 Test Suite Outline
@@ -82,7 +98,7 @@ Test Suite Outline
 - bonsai can be watered
 - bonsai can only be watered every 7 days
 - bonsai can be fertilized
-- bonsai can only be fertilized every 7 days
+- bonsai can only be fertilized every 30 days
 - bondai can grow
 - bonsai can only grow after 90 days of tending
 - bonsai can wither
@@ -118,24 +134,25 @@ def test_mint_not_botanist(bbank, caretaker, botanist):
 # bonsai can be watered
 def test_watering(bbank, dai, weth, caretaker, botanist):
     bonsai_uri = "ipfs://aaaa"
-    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist})
-    water_rate = bbank.waterRate()
-    dai.approve(bbank.address, water_rate)
+    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist}).return_value
+    water_amt = bbank.getWaterAmount()
+    dai.approve(bbank.address, water_amt, {"from": caretaker})
     starting_dai = dai.balanceOf(caretaker)
+    assert starting_dai > 0;
     bbank.water(bonsai_id, {"from": caretaker})
     ending_dai = dai.balanceOf(caretaker)
-    assert starting_dai - ending_dai == water_rate
+    assert starting_dai - ending_dai == water_amt
     assert 0 != bbank.lastWatered(bonsai_id)
     assert 1 == bbank.consecutiveWaterings(bonsai_id)
-    assert 0 == bbank.waterBalance(bonsai_id)
+    assert water_amt == bbank.waterBalance(bonsai_id)
     assert 0 == bbank.fertilizerBalance(bonsai_id)
 
 # bonsai can only be watered every 7 days
 def test_watering_early(bbank, dai, weth, caretaker, botanist):
     bonsai_uri = "ipfs://aaaa"
-    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist})
-    water_rate = bbank.waterRate()
-    dai.approve(bbank.address, water_rate)
+    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist}).return_value
+    water_amt = bbank.getWaterAmount()
+    dai.approve(bbank.address, water_amt, {"from": caretaker})
     bbank.water(bonsai_id, {"from": caretaker})
     # Second watering will revert bc it hasn't been 7 days
     with reverts():
@@ -144,7 +161,7 @@ def test_watering_early(bbank, dai, weth, caretaker, botanist):
 # bonsai can be fertilized
 def test_fertilizing(bbank, dai, weth, caretaker, botanist):
     bonsai_uri = "ipfs://aaaa"
-    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist})
+    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist}).return_value
     fert_rate = bbank.fertRate()
     weth.approve(bbank.address, fert_rate)
     starting_weth = weth.balanceOf(caretaker)

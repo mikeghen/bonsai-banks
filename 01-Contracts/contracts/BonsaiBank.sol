@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/token/ERC721/ERC721.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/token/ERC20/IERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/utils/Counters.sol";
 
@@ -41,41 +42,37 @@ contract BonsaiBank is ERC721URIStorage {
       _;
     }
 
-    // @dev Mints a new Bonsai Bank directly to the caretaker
-    function mint(address caretaker, string memory bonsaiURI) external onlyBotanist returns (uint256 bonsaiId)  {
-
-      bonsaiIds.increment();
-      uint256 _bonsaiId = bonsaiIds.current();
-      Bonsai memory bb = Bonsai(0,0,0,0,0,0,0,_bonsaiId);
-      _mint(caretaker, _bonsaiId);
-      _setTokenURI(_bonsaiId, bonsaiURI);
-      bonsaiBanks.push(bb);
-      return _bonsaiId;
-
-    }
-
-    function water(uint256 bonsaiId) external {
-      // ...
-    }
-
-    function fertilize(uint256 bonsaiId) external {
-      // ...
-    }
-
-    function grow(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {
-      // ...
-    }
-
-    function wither(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {
-      // ...
-    }
-
-    function destroy(uint256 bonsaiId) external {
-      // ...
-    }
-
     // Getter Methods
     // TODO: Add `get` prefix
+
+    function getBotanist() external view returns(address) {
+      return botanist;
+    }
+
+    function getWaterToken() external view returns(address) {
+      return waterToken;
+    }
+
+    function getFertToken() external view returns(address) {
+      return fertToken;
+    }
+
+    function getWaterAmount() public view returns(uint256) {
+      return waterAmount;
+    }
+
+    function getFertAmount() external view returns(uint256) {
+      return fertAmount;
+    }
+
+    function getWaterRate() external view returns(uint256) {
+      return waterRate;
+    }
+
+    function getFertRate() external view returns(uint256) {
+      return fertRate;
+    }
+
     function lastWatered(uint256 bonsaiId) external view returns (uint256){
       return bonsaiBanks[bonsaiId-1].lastWatered;
     }
@@ -105,33 +102,104 @@ contract BonsaiBank is ERC721URIStorage {
     }
 
     // Setter Methods
-    function setLastWatered(uint256 bonsaiId, uint256 _lastWatered) external onlyBotanist {
+    function setBotanist(address _botanist) external onlyBotanist {
+      botanist = _botanist;
+    }
+
+    function setWaterToken(address _waterToken) external onlyBotanist {
+      waterToken = _waterToken;
+    }
+
+    function setFertToken(address _fertToken) external onlyBotanist {
+      fertToken = _fertToken;
+    }
+
+    function setWaterAmount(uint256 _waterAmount) external {
+      waterAmount = _waterAmount;
+    }
+
+    function setFertAmount(uint256 _fertAmount) external {
+      fertAmount = _fertAmount;
+    }
+
+    function setWaterRate(uint256 _waterRate) external {
+      waterRate = _waterRate;
+    }
+
+    function setFertRate(uint256 _fertRate) external {
+      fertRate = _fertRate;
+    }
+
+    // Interal only setters for Bonsai Banks
+    function setLastWatered(uint256 bonsaiId, uint256 _lastWatered) internal {
       bonsaiBanks[bonsaiId-1].lastWatered = _lastWatered;
     }
 
-    function setConsecutiveWaterings(uint256 bonsaiId, uint256 _consecutiveWaterings) external onlyBotanist {
+    function setConsecutiveWaterings(uint256 bonsaiId, uint256 _consecutiveWaterings) internal {
       bonsaiBanks[bonsaiId-1].consecutiveWaterings = _consecutiveWaterings;
     }
 
-    function setWaterBalance(uint256 bonsaiId, uint256 _waterBalance) external onlyBotanist {
+    function setWaterBalance(uint256 bonsaiId, uint256 _waterBalance) internal {
       bonsaiBanks[bonsaiId-1].waterBalance = _waterBalance;
     }
 
-    function setLastFertilized(uint256 bonsaiId, uint256 _lastFertilized) external onlyBotanist {
+    function setLastFertilized(uint256 bonsaiId, uint256 _lastFertilized) internal {
       bonsaiBanks[bonsaiId-1].lastFertilized = _lastFertilized;
     }
 
-    function setConsecutiveFertilizings(uint256 bonsaiId, uint256 _consecutiveFertilizings) external onlyBotanist {
+    function setConsecutiveFertilizings(uint256 bonsaiId, uint256 _consecutiveFertilizings) internal {
       bonsaiBanks[bonsaiId-1].consecutiveFertilizings = _consecutiveFertilizings;
     }
 
-    function setFertilizerBalance(uint256 bonsaiId, uint256 _fertilizerBalance) external onlyBotanist {
+    function setFertilizerBalance(uint256 bonsaiId, uint256 _fertilizerBalance) internal {
       bonsaiBanks[bonsaiId-1].fertilizerBalance = _fertilizerBalance;
     }
 
-    function setLifeStage(uint256 bonsaiId, uint256 _lifeStage) external onlyBotanist {
+    function setLifeStage(uint256 bonsaiId, uint256 _lifeStage) external {
       bonsaiBanks[bonsaiId-1].lifeStage = _lifeStage;
     }
+
+
+    // Core Bonsai Bank Functionality
+
+    // @dev Mints a new Bonsai Bank directly to the caretaker
+    function mint(address caretaker, string memory bonsaiURI) external onlyBotanist returns (uint256 bonsaiId)  {
+
+      bonsaiIds.increment();
+      uint256 _bonsaiId = bonsaiIds.current();
+      Bonsai memory bb = Bonsai(0,0,0,0,0,0,0,_bonsaiId);
+      _mint(caretaker, _bonsaiId);
+      _setTokenURI(_bonsaiId, bonsaiURI);
+      bonsaiBanks.push(bb);
+      return _bonsaiId;
+
+    }
+
+    function water(uint256 _bonsaiId) external {
+      require(bonsaiBanks[_bonsaiId - 1].lastWatered < block.timestamp - 7 days, "!waterable");
+      require(IERC20(waterToken).transferFrom(msg.sender, address(this), getWaterAmount()), "!watered");
+      bonsaiBanks[_bonsaiId - 1].lastWatered = block.timestamp;
+      bonsaiBanks[_bonsaiId - 1].consecutiveWaterings += 1;
+      bonsaiBanks[_bonsaiId - 1].waterBalance += getWaterAmount();
+    }
+
+    function fertilize(uint256 bonsaiId) external {
+      // ...
+    }
+
+    function grow(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {
+      // ...
+    }
+
+    function wither(uint256 bonsaiId, string memory bonsaiURI) external onlyBotanist {
+      // ...
+    }
+
+    function destroy(uint256 bonsaiId) external {
+      // ...
+    }
+
+
 
 
 
