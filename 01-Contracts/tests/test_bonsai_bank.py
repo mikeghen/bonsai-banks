@@ -2,11 +2,6 @@ from brownie import accounts, reverts
 from brownie.network.state import Chain
 import pytest
 
-"""
-TODO:
-- Stage caretaker with DAI and WETH needed
-"""
-
 
 DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F"
 WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -221,15 +216,15 @@ def test_wilt_early(bbank, dai, weth, caretaker, botanist, bonsai_wilt):
         bbank.wilt(bonsai_wilt, new_bonsai_uri, {"from": botanist})
 
 # bonsai can be destroyed to recover the funds
-def test_destroy(bbank, dai, weth, caretaker, botanist, bonsai_wilt):
-    bonsai_dai = bbank.waterBalance(bonsai_id)
-    bonsai_weth = bbank.fertilizerBalance(bonsai_id)
-    dai_bal_starting = dai.balanceOf(botanist)
-    weth_bal_starting = weth.balanceOf(botanist)
+def test_destroy(bbank, dai, weth, caretaker, botanist, bonsai_grow):
+    bonsai_dai = bbank.waterBalance(bonsai_grow)
+    bonsai_weth = bbank.fertilizerBalance(bonsai_grow)
+    dai_bal_starting = dai.balanceOf(caretaker)
+    weth_bal_starting = weth.balanceOf(caretaker)
     bbank.destroy(bonsai_grow, {"from":caretaker})
-    dai_bal_ending = dai.balanceOf(botanist)
-    weth_bal_ending = weth.balanceOf(botanist)
-    assert dai_bal_starting - dai_bal_ending == bonsai_dai
-    assert weth_bal_starting - weth_bal_ending == bonsai_weth
-    assert 0 == bbank.waterBalance(bonsai_id)
-    assert 0 == bbank.fertilizerBalance(bonsai_id)
+    dai_bal_ending = dai.balanceOf(caretaker)
+    weth_bal_ending = weth.balanceOf(caretaker)
+    assert dai_bal_ending - dai_bal_starting == bonsai_dai
+    assert weth_bal_ending - weth_bal_starting == bonsai_weth
+    assert 0 == bbank.waterBalance(bonsai_grow)
+    assert 0 == bbank.fertilizerBalance(bonsai_grow)

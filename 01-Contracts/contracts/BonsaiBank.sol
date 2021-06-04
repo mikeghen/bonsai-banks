@@ -210,8 +210,12 @@ contract BonsaiBank is ERC721URIStorage {
       bonsaiBanks[_bonsaiId - 1].consecutiveFertilizings = 0;
     }
 
-    function destroy(uint256 bonsaiId) external {
-      // ...
+    function destroy(uint256 _bonsaiId) external {
+      require(ownerOf(_bonsaiId) == msg.sender, "!caretaker");
+      require(IERC20(waterToken).transfer(msg.sender,  bonsaiBanks[_bonsaiId - 1].waterBalance), "!withdrawWater");
+      require(IERC20(fertToken).transfer(msg.sender, bonsaiBanks[_bonsaiId - 1].fertilizerBalance), "!withdrawFertlizer");
+      bonsaiBanks[_bonsaiId - 1].waterBalance = 0;
+      bonsaiBanks[_bonsaiId - 1].fertilizerBalance = 0;
     }
 
 
