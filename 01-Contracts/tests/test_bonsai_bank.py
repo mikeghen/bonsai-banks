@@ -46,13 +46,13 @@ def bbank(BonsaiBank, botanist, dai, weth):
 
 
 @pytest.fixture
-def bonsai_wither(bbank, caretaker, botanist, chain):
+def bonsai_wilt(bbank, caretaker, botanist, dai, chain):
     # Return the tokenId of a basic bonsai
     bonsai_uri = "ipfs://wwww"
-    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist})
-    water_rate = bbank.waterRate()
-    dai.appove(bbank.address, water_rate, {"from": caretaker})
-    bbank.water(bonsai_id)
+    bonsai_id = bbank.mint(caretaker, bonsai_uri, {"from": botanist}).return_value
+    water_amt = bbank.getWaterAmount()
+    dai.approve(bbank.address, water_amt, {"from": caretaker})
+    bbank.water(bonsai_id, {"from": caretaker})
     chain.sleep(THIRTY_DAYS)
     return bonsai_id
 
@@ -91,8 +91,8 @@ Test Suite Outline
 - bonsai can only be fertilized every 30 days
 - bondai can grow
 - bonsai can only grow after 90 days of tending
-- bonsai can wither
-- bonsai can only wither after 14 days without water
+- bonsai can wilt
+- bonsai can only wilt after 14 days without water
 - bonsai can be destroyed to recover the funds
 """
 
@@ -193,31 +193,35 @@ def test_grow_early(bbank, dai, weth, caretaker, botanist, bonsai_grow):
         bbank.grow(bonsai_grow, new_bonsai_uri, {"from": botanist})
 
 
-# bonsai can wither
-def test_wither(bbank, dai, weth, caretaker, botanist, bonsai_wither):
-    nft_dai = bbank.waterBalance(bonsai_id)
-    nft_weth = bbank.fertilizerBalance(bonsai_id)
+# bonsai can wilt
+def test_wilt(bbank, dai, weth, caretaker, botanist, bonsai_wilt):
+    new_bonsai_uri = "ipfs://nnnn"
+    nft_dai = bbank.waterBalance(bonsai_wilt)
+    nft_weth = bbank.fertilizerBalance(bonsai_wilt)
     bot_dai_bal_starting = dai.balanceOf(botanist)
     bot_weth_bal_starting = weth.balanceOf(botanist)
-    bbank.wither(bonsai_wither, {"from": botanist})
+    bbank.wilt(bonsai_wilt, new_bonsai_uri, {"from": botanist})
     ending_weth = weth.balanceOf(caretaker)
     bot_dai_bal_ending = dai.balanceOf(botanist)
     bot_weth_bal_ending = weth.balanceOf(botanist)
-    assert bot_dai_bal_starting - bot_dai_bal_ending == nft_dai * 0.95
-    assert bot_weth_bal_starting - bot_weth_bal_ending == nft_weth * 0.95
-    assert 0 == bbank.consecutiveWaterings(bonsai_id)
-    assert 0 == bbank.consecutiveFertilizings(bonsai_id)
+    assert new_bonsai_uri == bbank.tokenURI(bonsai_wilt)
+
+    assert bot_dai_bal_ending - bot_dai_bal_starting == int(nft_dai * 0.95)
+    assert bot_weth_bal_ending - bot_weth_bal_starting == int(nft_weth * 0.95)
+    assert 0 == bbank.consecutiveWaterings(bonsai_wilt)
+    assert 0 == bbank.consecutiveFertilizings(bonsai_wilt)
 
 
-# bonsai can only wither after 14 days without water
-def test_wither_early(bbank, dai, weth, caretaker, botanist, bonsai_wither):
-    bbank.wither(bonsai_wither, {"from": botanist})
+# bonsai can only wilt after 14 days without water
+def test_wilt_early(bbank, dai, weth, caretaker, botanist, bonsai_wilt):
+    new_bonsai_uri = "ipfs://nnnn"
+    bbank.wilt(bonsai_wilt, new_bonsai_uri, {"from": botanist})
     # Second fertilizing will revert bc. it hasn't been 30 days
     with reverts():
-        bbank.wither(bonsai_wither, {"from": botanist})
+        bbank.wilt(bonsai_wilt, new_bonsai_uri, {"from": botanist})
 
 # bonsai can be destroyed to recover the funds
-def test_destroy(bbank, dai, weth, caretaker, botanist, bonsai_wither):
+def test_destroy(bbank, dai, weth, caretaker, botanist, bonsai_wilt):
     bonsai_dai = bbank.waterBalance(bonsai_id)
     bonsai_weth = bbank.fertilizerBalance(bonsai_id)
     dai_bal_starting = dai.balanceOf(botanist)

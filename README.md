@@ -7,7 +7,7 @@ Tradeable Savings Accounts featuring evolving digital artwork and game-mechanism
   * is minted by the _botanist_ or contract owner
   * must be _watered_ by depositing 20 DAI into the bank every 7 days
   * must be _fertilized_ by depositing 0.02 ETH into the bank every 30 days
-  * can _wither_ if watering is more than 7 days late and 5% of the deposits will go to the botanist
+  * can _wilt_ if watering is more than 7 days late and 5% of the deposits will go to the botanist
   * can _grow_ if taken care of correctly for 90 days the botanist will make an enhancement to the bonsai art
   * must be _destroyed_ to recover the deposits plus an interest earned
 
@@ -81,9 +81,9 @@ Tradeable Savings Accounts featuring evolving digital artwork and game-mechanism
   * The `lifeStage` is incremented by 1
   * `consecutiveWaterings` and `consecutiveFertilizings` are reset
 
-#### wither(uint256 bonsaiId) onlybotanist
+#### wilt(uint256 bonsaiId) onlybotanist
 * Parameters
-  * `bonsaiId` - The id of the bonsai to wither
+  * `bonsaiId` - The id of the bonsai to wilt
   * `bonsaiUri` - The id of the new image for the plant
 * Pre-conditions
   * It has been `waterRate * 2` seconds since the last watering
