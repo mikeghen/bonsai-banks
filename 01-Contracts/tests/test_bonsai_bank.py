@@ -224,9 +224,9 @@ def test_destroy(bbank, dai, weth, caretaker, botanist, bonsai_grow):
     bbank.destroy(bonsai_grow, {"from":caretaker})
     dai_bal_ending = dai.balanceOf(caretaker)
     weth_bal_ending = weth.balanceOf(caretaker)
-    is_destroyed = bbank.isDestroyed(bonsai_grow)
+    is_destroyed = bbank.exists(bonsai_grow)
     assert dai_bal_ending - dai_bal_starting == bonsai_dai
     assert weth_bal_ending - weth_bal_starting == bonsai_weth
     assert 0 == bbank.waterBalance(bonsai_grow)
     assert 0 == bbank.fertilizerBalance(bonsai_grow)
-    assert True == bbank.isDestroyed(bonsai_grow)
+    assert False == bbank.exists(bonsai_grow)

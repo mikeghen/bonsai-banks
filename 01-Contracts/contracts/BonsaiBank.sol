@@ -14,15 +14,13 @@ contract BonsaiBank is ERC721URIStorage {
     Counters.Counter private bonsaiIds;
 
     struct Bonsai {
-      uint256 lastWatered;
-      uint256 consecutiveWaterings;
-      uint256 waterBalance;
-      uint256 lastFertilized;
-      uint256 consecutiveFertilizings;
-      uint256 fertilizerBalance;
-      uint256 lifeStage;
-      bool isDestroyed;
-      uint256 bonsaiId;
+      uint256 lastWatered;               // The last time the bonsai was watered
+      uint256 consecutiveWaterings;      // The number of waterings gone without missing a watering
+      uint256 waterBalance;              // The amount of water tokens deposited
+      uint256 lastFertilized;            // The last time the bonsai was fertilized
+      uint256 consecutiveFertilizings;   // The number of fertilizings without missing a fertilize
+      uint256 fertilizerBalance;         // The amount of fertilizer tokens deposited
+      uint256 lifeStage;                 // The amount of times this bonsai has been grown or wilted
     }
 
     Bonsai[] bonsaiBanks; // All bonsai banks, indexible by bonsai/tokenId - 1
@@ -104,8 +102,8 @@ contract BonsaiBank is ERC721URIStorage {
       return bonsaiBanks[bonsaiId-1].lifeStage;
     }
 
-    function isDestroyed(uint256 bonsaiId) external view returns (bool){
-      return bonsaiBanks[bonsaiId-1].isDestroyed;
+    function exists(uint256 bonsaiId) external view returns (bool){
+      return _exists(bonsaiId);
     }
 
     // Setter Methods
@@ -172,7 +170,7 @@ contract BonsaiBank is ERC721URIStorage {
     function mint(address caretaker, string memory bonsaiURI) external onlyBotanist returns (uint256 bonsaiId)  {
       bonsaiIds.increment();
       uint256 _bonsaiId = bonsaiIds.current();
-      Bonsai memory bb = Bonsai(0,0,0,0,0,0,0,false,_bonsaiId);
+      Bonsai memory bb = Bonsai(0,0,0,0,0,0,0);
       _mint(caretaker, _bonsaiId);
       _setTokenURI(_bonsaiId, bonsaiURI);
       bonsaiBanks.push(bb);
@@ -219,7 +217,6 @@ contract BonsaiBank is ERC721URIStorage {
       require(IERC20(fertToken).transfer(msg.sender, bonsaiBanks[_bonsaiId - 1].fertilizerBalance), "!withdrawFertlizer");
       bonsaiBanks[_bonsaiId - 1].waterBalance = 0;
       bonsaiBanks[_bonsaiId - 1].fertilizerBalance = 0;
-      bonsaiBanks[_bonsaiId - 1].isDestroyed = true;
       _burn(_bonsaiId);
     }
 
