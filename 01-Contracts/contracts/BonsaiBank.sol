@@ -21,10 +21,11 @@ contract BonsaiBank is ERC721URIStorage {
       uint256 consecutiveFertilizings;
       uint256 fertilizerBalance;
       uint256 lifeStage;
+      bool isDestroyed;
       uint256 bonsaiId;
     }
 
-    Bonsai[] bonsaiBanks; // All bonsai banks, indexible by tokenId - 1
+    Bonsai[] bonsaiBanks; // All bonsai banks, indexible by bonsai/tokenId - 1
 
     address botanist;
     address waterToken;
@@ -103,6 +104,10 @@ contract BonsaiBank is ERC721URIStorage {
       return bonsaiBanks[bonsaiId-1].lifeStage;
     }
 
+    function isDestroyed(uint256 bonsaiId) external view returns (bool){
+      return bonsaiBanks[bonsaiId-1].isDestroyed;
+    }
+
     // Setter Methods
     function setBotanist(address _botanist) external onlyBotanist {
       botanist = _botanist;
@@ -116,19 +121,19 @@ contract BonsaiBank is ERC721URIStorage {
       fertToken = _fertToken;
     }
 
-    function setWaterAmount(uint256 _waterAmount) external {
+    function setWaterAmount(uint256 _waterAmount) external onlyBotanist {
       waterAmount = _waterAmount;
     }
 
-    function setFertAmount(uint256 _fertAmount) external {
+    function setFertAmount(uint256 _fertAmount) external onlyBotanist {
       fertAmount = _fertAmount;
     }
 
-    function setWaterRate(uint256 _waterRate) external {
+    function setWaterRate(uint256 _waterRate) external onlyBotanist {
       waterRate = _waterRate;
     }
 
-    function setFertRate(uint256 _fertRate) external {
+    function setFertRate(uint256 _fertRate) external onlyBotanist {
       fertRate = _fertRate;
     }
 
@@ -161,20 +166,17 @@ contract BonsaiBank is ERC721URIStorage {
       bonsaiBanks[bonsaiId-1].lifeStage = _lifeStage;
     }
 
-
     // Core Bonsai Bank Functionality
 
     // @dev Mints a new Bonsai Bank directly to the caretaker
     function mint(address caretaker, string memory bonsaiURI) external onlyBotanist returns (uint256 bonsaiId)  {
-
       bonsaiIds.increment();
       uint256 _bonsaiId = bonsaiIds.current();
-      Bonsai memory bb = Bonsai(0,0,0,0,0,0,0,_bonsaiId);
+      Bonsai memory bb = Bonsai(0,0,0,0,0,0,0,false,_bonsaiId);
       _mint(caretaker, _bonsaiId);
       _setTokenURI(_bonsaiId, bonsaiURI);
       bonsaiBanks.push(bb);
       return _bonsaiId;
-
     }
 
     function water(uint256 _bonsaiId) external {
@@ -217,10 +219,8 @@ contract BonsaiBank is ERC721URIStorage {
       require(IERC20(fertToken).transfer(msg.sender, bonsaiBanks[_bonsaiId - 1].fertilizerBalance), "!withdrawFertlizer");
       bonsaiBanks[_bonsaiId - 1].waterBalance = 0;
       bonsaiBanks[_bonsaiId - 1].fertilizerBalance = 0;
+      bonsaiBanks[_bonsaiId - 1].isDestroyed = true;
+      _burn(_bonsaiId);
     }
-
-
-
-
 
 }
