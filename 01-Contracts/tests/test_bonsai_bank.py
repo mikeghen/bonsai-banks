@@ -37,6 +37,7 @@ def bbank(BonsaiBank, botanist, dai, weth):
     # 0.02 WETH per month
     bb.setFertAmount(0.02 * 10**18)
     bb.setFertRate(60 * 60 * 24 * 30)
+    bb.setWateringsToGrow(15)
     return bb
 
 

@@ -23,16 +23,16 @@ contract BonsaiBank is ERC721URIStorage {
       uint256 lifeStage;                 // The amount of times this bonsai has been grown or wilted
     }
 
-    Bonsai[] bonsaiBanks; // All bonsai banks, indexible by bonsai/tokenId - 1
+    Bonsai[] bonsaiBanks;                // All bonsai banks, indexible by bonsai/tokenId - 1
 
-    address botanist;
-    address waterToken;
-    address fertToken;
-    uint256 waterAmount;
-    uint256 fertAmount;
-    uint256 waterRate;
-    uint256 fertRate;
-    uint256 wateringsToGrow = 15; // ~3 months
+    address botanist;                   // The owner of the contract, has control of the protocol
+    address waterToken;                 // The ERC20 token address to use for watering
+    address fertToken;                  // The ERC20 token address to use for fertilizing
+    uint256 waterAmount;                // The amount of waterTokens needed for watering
+    uint256 fertAmount;                 // The amount of fertTokens needed for fertilizing
+    uint256 waterRate;                  // The time delay between waterings in seconds
+    uint256 fertRate;                   // The time delay between fertilizing in seconds
+    uint256 wateringsToGrow;            // The number of consecutive waterings needed to grow
 
 
     constructor(address _botanist) ERC721("Bonsai Bank", "BNZI") {
@@ -133,6 +133,10 @@ contract BonsaiBank is ERC721URIStorage {
 
     function setFertRate(uint256 _fertRate) external onlyBotanist {
       fertRate = _fertRate;
+    }
+
+    function setWateringsToGrow(uint256 _wateringsToGrow) external onlyBotanist {
+      wateringsToGrow = _wateringsToGrow;
     }
 
     // Interal only setters for Bonsai Banks
