@@ -14,29 +14,31 @@ contract BonsaiBank is ERC721URIStorage {
     Counters.Counter private bonsaiIds;
 
     struct Bonsai {
-      uint256 lastWatered;               // The last time the bonsai was watered
-      uint256 consecutiveWaterings;      // The number of waterings gone without missing a watering
-      uint256 waterBalance;              // The amount of water tokens deposited
-      uint256 lastFertilized;            // The last time the bonsai was fertilized
-      uint256 consecutiveFertilizings;   // The number of fertilizings without missing a fertilize
-      uint256 fertilizerBalance;         // The amount of fertilizer tokens deposited
-      uint256 lifeStage;                 // The amount of times this bonsai has been grown or wilted
+      uint256 lastWatered;                     // The last time the bonsai was watered
+      uint256 consecutiveWaterings;            // The number of waterings gone without missing a watering
+      uint256 waterBalance;                    // The amount of water tokens deposited
+      uint256 lastFertilized;                  // The last time the bonsai was fertilized
+      uint256 consecutiveFertilizings;         // The number of fertilizings without missing a fertilize
+      uint256 fertilizerBalance;               // The amount of fertilizer tokens deposited
+      uint256 lifeStage;                       // The amount of times this bonsai has been grown or wilted
     }
 
-    Bonsai[] bonsaiBanks;                // All bonsai banks, indexible by bonsai/tokenId - 1
+    Bonsai[] bonsaiBanks;                      // All bonsai banks, indexible by bonsai/tokenId
 
-    address botanist;                   // The owner of the contract, has control of the protocol
-    address waterToken;                 // The ERC20 token address to use for watering
-    address fertToken;                  // The ERC20 token address to use for fertilizing
-    uint256 waterAmount;                // The amount of waterTokens needed for watering
-    uint256 fertAmount;                 // The amount of fertTokens needed for fertilizing
-    uint256 waterRate;                  // The time delay between waterings in seconds
-    uint256 fertRate;                   // The time delay between fertilizing in seconds
-    uint256 wateringsToGrow;            // The number of consecutive waterings needed to grow
+    address botanist;                          // The owner of the contract, has control of the protocol
+    address waterToken;                        // The ERC20 token address to use for watering
+    address fertToken;                         // The ERC20 token address to use for fertilizing
+    uint256 waterAmount;                       // The amount of waterTokens needed for watering
+    uint256 fertAmount;                        // The amount of fertTokens needed for fertilizing
+    uint256 waterRate;                         // The time delay between waterings in seconds
+    uint256 fertRate;                          // The time delay between fertilizing in seconds
+    uint256 wateringsToGrow;                   // The number of consecutive waterings needed to grow
 
+    bool private firstBonsaiHasBeenMinted;     // To allow bonsaiIds incrementing only after first bonsai is minted
 
     constructor(address _botanist) ERC721("Bonsai Bank", "BNZI") {
         botanist = _botanist;
+        firstBonsaiHasBeenMinted = false;
     }
 
     modifier onlyBotanist {
@@ -75,31 +77,31 @@ contract BonsaiBank is ERC721URIStorage {
     }
 
     function lastWatered(uint256 bonsaiId) external view returns (uint256){
-      return bonsaiBanks[bonsaiId-1].lastWatered;
+      return bonsaiBanks[bonsaiId].lastWatered;
     }
 
     function consecutiveWaterings(uint256 bonsaiId) external view returns (uint256){
-      return bonsaiBanks[bonsaiId-1].consecutiveWaterings;
+      return bonsaiBanks[bonsaiId].consecutiveWaterings;
     }
 
     function waterBalance(uint256 bonsaiId) external view returns (uint256){
-      return bonsaiBanks[bonsaiId-1].waterBalance;
+      return bonsaiBanks[bonsaiId].waterBalance;
     }
 
     function lastFertilized(uint256 bonsaiId) external view returns (uint256){
-      return bonsaiBanks[bonsaiId-1].lastFertilized;
+      return bonsaiBanks[bonsaiId].lastFertilized;
     }
 
     function consecutiveFertilizings(uint256 bonsaiId) external view returns (uint256){
-      return bonsaiBanks[bonsaiId-1].consecutiveFertilizings;
+      return bonsaiBanks[bonsaiId].consecutiveFertilizings;
     }
 
     function fertilizerBalance(uint256 bonsaiId) external view returns (uint256){
-      return bonsaiBanks[bonsaiId-1].fertilizerBalance;
+      return bonsaiBanks[bonsaiId].fertilizerBalance;
     }
 
     function lifeStage(uint256 bonsaiId) external view returns (uint256){
-      return bonsaiBanks[bonsaiId-1].lifeStage;
+      return bonsaiBanks[bonsaiId].lifeStage;
     }
 
     function exists(uint256 bonsaiId) external view returns (bool){
@@ -141,38 +143,42 @@ contract BonsaiBank is ERC721URIStorage {
 
     // Interal only setters for Bonsai Banks
     function setLastWatered(uint256 bonsaiId, uint256 _lastWatered) internal {
-      bonsaiBanks[bonsaiId-1].lastWatered = _lastWatered;
+      bonsaiBanks[bonsaiId].lastWatered = _lastWatered;
     }
 
     function setConsecutiveWaterings(uint256 bonsaiId, uint256 _consecutiveWaterings) internal {
-      bonsaiBanks[bonsaiId-1].consecutiveWaterings = _consecutiveWaterings;
+      bonsaiBanks[bonsaiId].consecutiveWaterings = _consecutiveWaterings;
     }
 
     function setWaterBalance(uint256 bonsaiId, uint256 _waterBalance) internal {
-      bonsaiBanks[bonsaiId-1].waterBalance = _waterBalance;
+      bonsaiBanks[bonsaiId].waterBalance = _waterBalance;
     }
 
     function setLastFertilized(uint256 bonsaiId, uint256 _lastFertilized) internal {
-      bonsaiBanks[bonsaiId-1].lastFertilized = _lastFertilized;
+      bonsaiBanks[bonsaiId].lastFertilized = _lastFertilized;
     }
 
     function setConsecutiveFertilizings(uint256 bonsaiId, uint256 _consecutiveFertilizings) internal {
-      bonsaiBanks[bonsaiId-1].consecutiveFertilizings = _consecutiveFertilizings;
+      bonsaiBanks[bonsaiId].consecutiveFertilizings = _consecutiveFertilizings;
     }
 
     function setFertilizerBalance(uint256 bonsaiId, uint256 _fertilizerBalance) internal {
-      bonsaiBanks[bonsaiId-1].fertilizerBalance = _fertilizerBalance;
+      bonsaiBanks[bonsaiId].fertilizerBalance = _fertilizerBalance;
     }
 
     function setLifeStage(uint256 bonsaiId, uint256 _lifeStage) external {
-      bonsaiBanks[bonsaiId-1].lifeStage = _lifeStage;
+      bonsaiBanks[bonsaiId].lifeStage = _lifeStage;
     }
 
     // Core Bonsai Bank Functionality
 
     // @dev Mints a new Bonsai Bank directly to the caretaker
     function mint(address caretaker, string memory bonsaiURI) external onlyBotanist returns (uint256 bonsaiId)  {
-      bonsaiIds.increment();
+      if (firstBonsaiHasBeenMinted) {
+        bonsaiIds.increment();    
+      } else {
+        firstBonsaiHasBeenMinted = true;
+      }
       uint256 _bonsaiId = bonsaiIds.current();
       Bonsai memory bb = Bonsai(0,0,0,0,0,0,0);
       _mint(caretaker, _bonsaiId);
@@ -182,45 +188,45 @@ contract BonsaiBank is ERC721URIStorage {
     }
 
     function water(uint256 _bonsaiId) external {
-      require(bonsaiBanks[_bonsaiId - 1].lastWatered < block.timestamp - waterRate, "!waterable");
+      require(bonsaiBanks[_bonsaiId].lastWatered < block.timestamp - waterRate, "!waterable");
       require(IERC20(waterToken).transferFrom(msg.sender, address(this), getWaterAmount()), "!watered");
-      bonsaiBanks[_bonsaiId - 1].lastWatered = block.timestamp;
-      bonsaiBanks[_bonsaiId - 1].consecutiveWaterings += 1;
-      bonsaiBanks[_bonsaiId - 1].waterBalance += getWaterAmount();
+      bonsaiBanks[_bonsaiId].lastWatered = block.timestamp;
+      bonsaiBanks[_bonsaiId].consecutiveWaterings += 1;
+      bonsaiBanks[_bonsaiId].waterBalance += getWaterAmount();
     }
 
     function fertilize(uint256 _bonsaiId) external {
-      require(bonsaiBanks[_bonsaiId - 1].lastFertilized < block.timestamp - fertRate, "!fertalizable");
+      require(bonsaiBanks[_bonsaiId].lastFertilized < block.timestamp - fertRate, "!fertalizable");
       require(IERC20(fertToken).transferFrom(msg.sender, address(this), getFertAmount()), "!fertilized");
-      bonsaiBanks[_bonsaiId - 1].lastFertilized = block.timestamp;
-      bonsaiBanks[_bonsaiId - 1].consecutiveFertilizings += 1;
-      bonsaiBanks[_bonsaiId - 1].fertilizerBalance += getFertAmount();
+      bonsaiBanks[_bonsaiId].lastFertilized = block.timestamp;
+      bonsaiBanks[_bonsaiId].consecutiveFertilizings += 1;
+      bonsaiBanks[_bonsaiId].fertilizerBalance += getFertAmount();
     }
 
     function grow(uint256 _bonsaiId, string memory _bonsaiURI) external onlyBotanist {
-      require(bonsaiBanks[_bonsaiId - 1].consecutiveWaterings >= wateringsToGrow, "!growable");
+      require(bonsaiBanks[_bonsaiId].consecutiveWaterings >= wateringsToGrow, "!growable");
       _setTokenURI(_bonsaiId, _bonsaiURI);
-      bonsaiBanks[_bonsaiId - 1].lifeStage += 1;
-      bonsaiBanks[_bonsaiId - 1].consecutiveWaterings = 0;
+      bonsaiBanks[_bonsaiId].lifeStage += 1;
+      bonsaiBanks[_bonsaiId].consecutiveWaterings = 0;
     }
 
     function wilt(uint256 _bonsaiId, string memory _bonsaiURI) external onlyBotanist {
-      require(bonsaiBanks[_bonsaiId - 1].lastWatered <= block.timestamp - waterRate.mul(2), "!wiltable");
-      uint256 waterSlashAmount = bonsaiBanks[_bonsaiId - 1].waterBalance.mul(95).div(100);     // TODO: Safe Math
-      uint256 fertSlashAmount = bonsaiBanks[_bonsaiId - 1].fertilizerBalance.mul(95).div(100); // TODO: Safe Math
+      require(bonsaiBanks[_bonsaiId].lastWatered <= block.timestamp - waterRate.mul(2), "!wiltable");
+      uint256 waterSlashAmount = bonsaiBanks[_bonsaiId].waterBalance.mul(95).div(100);     // TODO: Safe Math
+      uint256 fertSlashAmount = bonsaiBanks[_bonsaiId].fertilizerBalance.mul(95).div(100); // TODO: Safe Math
       require(IERC20(waterToken).transfer(botanist,  waterSlashAmount), "!slashedWater");
       require(IERC20(fertToken).transfer(botanist, fertSlashAmount), "!slashedFert");
       _setTokenURI(_bonsaiId, _bonsaiURI);
-      bonsaiBanks[_bonsaiId - 1].consecutiveWaterings = 0;
-      bonsaiBanks[_bonsaiId - 1].consecutiveFertilizings = 0;
+      bonsaiBanks[_bonsaiId].consecutiveWaterings = 0;
+      bonsaiBanks[_bonsaiId].consecutiveFertilizings = 0;
     }
 
     function destroy(uint256 _bonsaiId) external {
       require(ownerOf(_bonsaiId) == msg.sender, "!caretaker");
-      require(IERC20(waterToken).transfer(msg.sender,  bonsaiBanks[_bonsaiId - 1].waterBalance), "!withdrawWater");
-      require(IERC20(fertToken).transfer(msg.sender, bonsaiBanks[_bonsaiId - 1].fertilizerBalance), "!withdrawFertlizer");
-      bonsaiBanks[_bonsaiId - 1].waterBalance = 0;
-      bonsaiBanks[_bonsaiId - 1].fertilizerBalance = 0;
+      require(IERC20(waterToken).transfer(msg.sender,  bonsaiBanks[_bonsaiId].waterBalance), "!withdrawWater");
+      require(IERC20(fertToken).transfer(msg.sender, bonsaiBanks[_bonsaiId].fertilizerBalance), "!withdrawFertlizer");
+      bonsaiBanks[_bonsaiId].waterBalance = 0;
+      bonsaiBanks[_bonsaiId].fertilizerBalance = 0;
       _burn(_bonsaiId);
     }
 
