@@ -3,6 +3,8 @@ import logo from "./logo.svg";
 import "./App.css";
 import { useWeb3React } from "@web3-react/core";
 import { injected } from "./helpers/connector";
+import Botanist from "./pages/Botanist";
+import Caretaker from "./pages/Caretaker";
 import Web3 from "web3";
 
 import { Layout, Menu, Button } from "antd";
@@ -20,6 +22,7 @@ const { SubMenu } = Menu;
 function App() {
 	const web3React = useWeb3React();
 	const [collapsed, setCollapsed] = useState(true);
+	const [currentUI, setCurrentUI] = useState(<Caretaker />);
 	const onError = (err) => {
 		console.error(err);
 		// debugger;
@@ -37,13 +40,19 @@ function App() {
 	}
 
 	function onCollapse(collapse) {
-		// setCollapsed(collapse);
+		setCollapsed(collapse);
 	}
 
 	function onItemClick(item) {
 		// console.log(item);
 
 		switch (item.key) {
+			case "1":
+				setCurrentUI(<Botanist />);
+				break;
+			case "2":
+				setCurrentUI(<Caretaker />);
+				break;
 		}
 	}
 
@@ -52,48 +61,37 @@ function App() {
 			<Header
 				className="header"
 				style={{ position: "fixed", zIndex: 1, width: "100%" }}
-			></Header>
+			>
+				<div>
+					{web3React.active ? (
+						"Hello " + web3React.account
+					) : (
+						<Button onClick={ConnectWallet}>Connect Wallet</Button>
+					)}
+				</div>
+			</Header>
 			<Content className="site-layout" style={{ marginTop: 64 }}>
 				<Layout style={{ minHeight: "92vh" }}>
 					<Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
-						<div className="logo" />
 						<Menu theme="light" defaultSelectedKeys={["1"]} mode="inline">
-							<Menu.Item
-								key="1"
-								icon={<AreaChartOutlined />}
-								onClick={onItemClick}
-							>
-								Dashboard
-							</Menu.Item>
 							<Menu.Item
 								key="2"
 								icon={<DatabaseOutlined />}
 								onClick={onItemClick}
 							>
-								Manage
+								Caretaker
 							</Menu.Item>
 							<Menu.Item
-								key="3"
+								key="1"
 								icon={<FieldTimeOutlined />}
 								onClick={onItemClick}
 							>
-								Timeline
+								Botanist
 							</Menu.Item>
 						</Menu>
 					</Sider>
 					<Layout className="site-layout">
-						<Content>
-							<div
-								className="site-layout-background"
-								style={{ padding: 24, minHeight: 360 }}
-							>
-								{web3React.active ? (
-									"Hello " + web3React.account
-								) : (
-									<Button onClick={ConnectWallet}>Connect Wallet</Button>
-								)}
-							</div>
-						</Content>
+						<Content>{currentUI}</Content>
 						<Footer style={{ textAlign: "center" }}>
 							Bonsai Bank ©2021 Created by{" "}
 							<Link href="https://twitter.com/mikeghen" target="_blank">
