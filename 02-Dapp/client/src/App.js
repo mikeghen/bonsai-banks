@@ -8,11 +8,7 @@ import Caretaker from "./pages/Caretaker";
 import Web3 from "web3";
 
 import { Layout, Menu, Button } from "antd";
-import {
-	AreaChartOutlined,
-	DatabaseOutlined,
-	FieldTimeOutlined,
-} from "@ant-design/icons";
+import { HeartTwoTone, CheckCircleTwoTone } from "@ant-design/icons";
 import { Typography } from "antd";
 
 const { Link, Title } = Typography;
@@ -47,10 +43,10 @@ function App() {
 		// console.log(item);
 
 		switch (item.key) {
-			case "1":
+			case "2":
 				setCurrentUI(<Botanist />);
 				break;
-			case "2":
+			case "1":
 				setCurrentUI(<Caretaker />);
 				break;
 		}
@@ -75,15 +71,15 @@ function App() {
 					<Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
 						<Menu theme="light" defaultSelectedKeys={["1"]} mode="inline">
 							<Menu.Item
-								key="2"
-								icon={<DatabaseOutlined />}
+								key="1"
+								icon={<HeartTwoTone twoToneColor="#eb2f96" />}
 								onClick={onItemClick}
 							>
 								Caretaker
 							</Menu.Item>
 							<Menu.Item
-								key="1"
-								icon={<FieldTimeOutlined />}
+								key="2"
+								icon={<CheckCircleTwoTone twoToneColor="#52c41a" />}
 								onClick={onItemClick}
 							>
 								Botanist

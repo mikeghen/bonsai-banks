@@ -55,6 +55,7 @@ function WaterBonsai(props) {
 		setVisible(false);
 	};
 
+	/// @dev Get approval of token transfer
 	async function WaterABonsai() {
 		const contract = new Contract(
 			BonsaiBank.networks[web3React.chainId].address,
