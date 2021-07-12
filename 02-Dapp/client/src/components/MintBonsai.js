@@ -4,12 +4,15 @@ import { Form, Input, InputNumber, Modal, Button, notification } from "antd";
 // import { FormInstance } from "antd/lib/form";
 import { useWeb3React } from "@web3-react/core";
 import { Contract } from "@ethersproject/contracts";
-import BonsaiBank from "../artifacts/contracts/BonsaiBank.json";
+// import BonsaiBank from "../artifacts/contracts/BonsaiBank.json";
+// import BonsaiBank from "../artifacts/contracts/BonsaiBank.json";
+import BonsaiBank from "../contracts/BonsaiBank.json";
 // import Web3Context from "../context/Web3Context";
 
 function MintBonsai() {
 	// const details = useContext(Web3Context);
 	// const { accounts, contract, web3 } = details.current;
+	// console.log(myData);
 	const web3React = useWeb3React();
 	// console.log(web3React);
 	const [visible, setVisible] = React.useState(false);
@@ -53,35 +56,39 @@ function MintBonsai() {
 	};
 
 	async function CreateABonsai(values) {
+		// console.log(web3React.library.getSigner());
 		const contract = new Contract(
 			BonsaiBank.networks[web3React.chainId].address,
 			BonsaiBank.abi,
 			web3React.library.getSigner()
 		);
 		// console.log(contract);
+		console.log(values);
 		if (typeof contract !== undefined)
-			await contract
-				.mint(values.caretaker, values.bonsaiURI)
-				.then((response) => {
-					console.log(response);
-					setVisible(false);
-					setConfirmLoading(false);
-					openNotification();
-				})
-				.catch((error) => {
-					setVisible(false);
-					setConfirmLoading(false);
-					console.log(error.message);
-					openFailNotification();
-				});
+			await contract.getBotanist().then((response) => {
+				console.log(response);
+				// setVisible(false);
+				// setConfirmLoading(false);
+			});
+		await contract
+			.mint(values.caretaker, values.bonsaiURI)
+			.then((response) => {
+				console.log(response);
+				setVisible(false);
+				setConfirmLoading(false);
+				openNotification();
+			})
+			.catch((error) => {
+				setVisible(false);
+				setConfirmLoading(false);
+				console.log(error.message);
+				openFailNotification();
+			});
 	}
 
 	const onFinish = async (values) => {
-		console.log("Success:", values);
-		//TO DO: Add function to fire a query to handle addition of subscriber data.
+		// console.log("Success:", values);
 		await CreateABonsai(values);
-		// setVisible(false);
-		// setConfirmLoading(false);
 	};
 
 	return (
