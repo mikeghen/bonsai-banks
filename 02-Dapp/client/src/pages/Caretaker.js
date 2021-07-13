@@ -56,9 +56,9 @@ const columns = [
 		render: (text) => <Image width={200} src={text} />,
 	},
 	{
-		title: "Balances",
-		dataIndex: "balances",
-		key: "balances",
+		title: "Water Balances",
+		dataIndex: "waterBalance",
+		key: "waterBalance",
 		render: (text, record) => <>{text}</>,
 	},
 	{
