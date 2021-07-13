@@ -4,8 +4,6 @@ import { Form, Input, InputNumber, Modal, Button, notification } from "antd";
 // import { FormInstance } from "antd/lib/form";
 import { useWeb3React } from "@web3-react/core";
 import { Contract } from "@ethersproject/contracts";
-// import BonsaiBank from "../artifacts/contracts/BonsaiBank.json";
-// import BonsaiBank from "../artifacts/contracts/BonsaiBank.json";
 import BonsaiBank from "../contracts/BonsaiBank.json";
 // import Web3Context from "../context/Web3Context";
 
@@ -56,7 +54,9 @@ function MintBonsai() {
 	};
 
 	async function CreateABonsai(values) {
+		console.log(values);
 		// console.log(web3React.library.getSigner());
+		console.log(web3React.chainId);
 		const contract = new Contract(
 			BonsaiBank.networks[web3React.chainId].address,
 			BonsaiBank.abi,

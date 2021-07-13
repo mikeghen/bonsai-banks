@@ -168,6 +168,13 @@ contract BonsaiBank is ERC721URIStorage {
       bonsaiBanks[bonsaiId-1].lifeStage = _lifeStage;
     }
 
+    // Events
+    event BonsaiCreated(address caretaker,uint256 _bonsaiId,string bonsaiURI,address botanist );
+    event BonsaiWatered(address waterer,uint256 _bonsaiId,uint256 lastWatered,uint256 consecutiveWaterings,uint256 waterBalance );
+    event BonsaiFertilized(address waterer,uint256 _bonsaiId,uint256 lastFertilized,uint256 consecutiveFertilizings,uint256 fertilizerBalance );
+    event BonsaiGrow(address botanist,uint256 _bonsaiID,string _bonsaiURI,uint256 lifeStage,uint256 consecutiveWaterings);
+    event BonsaiWilt(address botanist,uint256 _bonsaiID,string _bonsaiURI,uint256 consecutiveFertilizings,uint256 consecutiveWaterings);
+    event BonsaiDestroy(address botanist,uint256 _bonsaiID,uint256 waterBalance, uint256 fertilizerBalance);
     // Core Bonsai Bank Functionality
 
     // @dev Mints a new Bonsai Bank directly to the caretaker
@@ -178,6 +185,7 @@ contract BonsaiBank is ERC721URIStorage {
       _mint(caretaker, _bonsaiId);
       _setTokenURI(_bonsaiId, bonsaiURI);
       bonsaiBanks.push(bb);
+      emit BonsaiCreated(caretaker, _bonsaiId, bonsaiURI, botanist);
       return _bonsaiId;
     }
 
@@ -187,6 +195,7 @@ contract BonsaiBank is ERC721URIStorage {
       bonsaiBanks[_bonsaiId - 1].lastWatered = block.timestamp;
       bonsaiBanks[_bonsaiId - 1].consecutiveWaterings += 1;
       bonsaiBanks[_bonsaiId - 1].waterBalance += getWaterAmount();
+      emit BonsaiWatered(msg.sender, _bonsaiId, bonsaiBanks[_bonsaiId - 1].lastWatered, bonsaiBanks[_bonsaiId - 1].consecutiveWaterings, bonsaiBanks[_bonsaiId - 1].waterBalance);
     }
 
     function fertilize(uint256 _bonsaiId) external {
@@ -195,6 +204,7 @@ contract BonsaiBank is ERC721URIStorage {
       bonsaiBanks[_bonsaiId - 1].lastFertilized = block.timestamp;
       bonsaiBanks[_bonsaiId - 1].consecutiveFertilizings += 1;
       bonsaiBanks[_bonsaiId - 1].fertilizerBalance += getFertAmount();
+      emit BonsaiFertilized(msg.sender, _bonsaiId, bonsaiBanks[_bonsaiId - 1].lastFertilized, bonsaiBanks[_bonsaiId - 1].consecutiveFertilizings, bonsaiBanks[_bonsaiId - 1].fertilizerBalance);
     }
 
     function grow(uint256 _bonsaiId, string memory _bonsaiURI) external onlyBotanist {
@@ -202,6 +212,7 @@ contract BonsaiBank is ERC721URIStorage {
       _setTokenURI(_bonsaiId, _bonsaiURI);
       bonsaiBanks[_bonsaiId - 1].lifeStage += 1;
       bonsaiBanks[_bonsaiId - 1].consecutiveWaterings = 0;
+      emit BonsaiGrow(botanist, _bonsaiId, _bonsaiURI, bonsaiBanks[_bonsaiId - 1].lifeStage, bonsaiBanks[_bonsaiId - 1].consecutiveWaterings);
     }
 
     function wilt(uint256 _bonsaiId, string memory _bonsaiURI) external onlyBotanist {
@@ -213,6 +224,7 @@ contract BonsaiBank is ERC721URIStorage {
       _setTokenURI(_bonsaiId, _bonsaiURI);
       bonsaiBanks[_bonsaiId - 1].consecutiveWaterings = 0;
       bonsaiBanks[_bonsaiId - 1].consecutiveFertilizings = 0;
+      emit BonsaiWilt(botanist, _bonsaiId, _bonsaiURI, bonsaiBanks[_bonsaiId - 1].consecutiveFertilizings, bonsaiBanks[_bonsaiId - 1].consecutiveWaterings);
     }
 
     function destroy(uint256 _bonsaiId) external {
@@ -222,6 +234,7 @@ contract BonsaiBank is ERC721URIStorage {
       bonsaiBanks[_bonsaiId - 1].waterBalance = 0;
       bonsaiBanks[_bonsaiId - 1].fertilizerBalance = 0;
       _burn(_bonsaiId);
+      emit BonsaiDestroy(botanist, _bonsaiId, bonsaiBanks[_bonsaiId - 1].waterBalance, bonsaiBanks[_bonsaiId - 1].fertilizerBalance);
     }
 
 }

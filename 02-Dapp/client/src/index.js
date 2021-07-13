@@ -5,6 +5,18 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
+import {
+	ApolloClient,
+	InMemoryCache,
+	ApolloProvider,
+	useQuery,
+	gql,
+} from "@apollo/client";
+
+const client = new ApolloClient({
+	uri: process.env.REACT_APP_GRAPHQL,
+	cache: new InMemoryCache(),
+});
 
 function getLibrary(provider, connector) {
 	// return new ethers.providers.Web3Provider(window.ethereum);
@@ -15,9 +27,11 @@ function getLibrary(provider, connector) {
 
 ReactDOM.render(
 	<Web3ReactProvider getLibrary={getLibrary}>
-		{/* <React.StrictMode> */}
-		<App />
-		{/* </React.StrictMode> */}
+		<ApolloProvider client={client}>
+			{/* <React.StrictMode> */}
+			<App />
+			{/* </React.StrictMode> */}
+		</ApolloProvider>
 	</Web3ReactProvider>,
 	document.getElementById("root")
 );

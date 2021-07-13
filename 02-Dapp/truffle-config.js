@@ -1,4 +1,6 @@
 const path = require("path");
+require("dotenv").config();
+const HDWalletProvider = require("truffle-hdwallet-provider");
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -41,6 +43,18 @@ module.exports = {
 			host: "localhost",
 			network_id: "1337",
 			port: 7545,
+		},
+		rinkeby: {
+			provider: () =>
+				new HDWalletProvider(
+					process.env.WALLET_KEY,
+					process.env.INFURA_RINKEBY
+				),
+			network_id: 4, // Rinkeby's id
+			gas: 5500000, // Rinkeby has a lower block limit than mainnet
+			confirmations: 2, // # of confs to wait between deployments. (default: 0))
+			skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+			networkCheckTimeout: 50000,
 		},
 		// Useful for testing. The `development` name is special - truffle uses it by default
 		// if it's defined here and no other network is specified at the command line.
