@@ -1,0 +1,57 @@
+type Bonsai @entity{
+  id:ID!
+  lastWatered: BigInt
+  consecutiveWaterings: BigInt
+  waterBalance: BigInt
+  lastFertilized: BigInt
+  consecutiveFertilizings: BigInt
+  fertilizerBalance: BigInt
+  lifeStage: BigInt
+  uri:String
+  botanist: Bytes
+  careTaker: Bytes
+  grow: [Growth!]! @derivedFrom(field:"bonsai")
+  water: [Water!]! @derivedFrom(field:"bonsai")
+  fertilize: [Fertilize!]! @derivedFrom(field:"bonsai")
+  wilt: [Wilt!]! @derivedFrom(field:"bonsai")
+  destroy: [Destroy!]! @derivedFrom(field:"bonsai")
+}
+
+type Growth @entity{
+  id:ID!
+  uri:String
+  lifeStage:BigInt
+  consecutiveWaterings:BigInt
+  bonsai: Bonsai
+}
+
+type Water @entity{
+  id:ID!
+  lastWatered:BigInt
+  consecutiveWaterings:BigInt
+  waterBalance:BigInt
+  bonsai: Bonsai
+}
+
+type Fertilize @entity{
+  id:ID!
+  consecutiveWaterings:BigInt
+  lastFertilized:BigInt
+  fertilizerBalance:BigInt
+  bonsai: Bonsai
+}
+
+type Wilt @entity{
+  id:ID!
+  uri:String
+  consecutiveFertilizings:BigInt
+  consecutiveWaterings:BigInt
+  bonsai: Bonsai
+}
+
+type Destroy @entity{
+  id:ID!
+  waterBalance: BigInt
+  fertilizerBalance: BigInt
+  bonsai: Bonsai
+}
